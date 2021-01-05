@@ -1,0 +1,1 @@
+export const ROS_WEBBRIDGE_SERVER = 'ws://192.168.0.187:9090';

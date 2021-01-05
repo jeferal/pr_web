@@ -1,24 +1,31 @@
-import logo from './logo.svg';
+/* global ROSLIB */
+import 'roslib/build/roslib';
+// import 'eventemitter2/lib/eventemitter2';
+
+import { useEffect } from 'react';
+import { ROS_WEBBRIDGE_SERVER } from './constants';
+
 import './App.css';
 
 function App() {
+
+  useEffect(() => {
+    var ros = new ROSLIB.Ros();
+
+    ros.on('error', error => console.log('Error! 💥'));
+    ros.on('connection', error => console.log('Connected! ✅'));
+    ros.on('close', error => console.log('Connection closed! ❌'));
+
+    ros.connect(ROS_WEBBRIDGE_SERVER);
+  })
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <main className="main">
+        <h1>PR Web</h1>
+        <button>Click me!</button>
+      </main>
+    </>
   );
 }
 
