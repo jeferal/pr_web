@@ -2,14 +2,14 @@
 import 'eventemitter2/lib/eventemitter2';
 import 'roslib/build/roslib';
 
-import { useEffect, useState } from 'react';
-import { ROS_WEBBRIDGE_SERVER } from './constants';
+import { useEffect } from 'react';
+import throttle from 'lodash/throttle'
+import Plotly from 'plotly.js-dist'
 
+import { ROS_WEBBRIDGE_SERVER } from './constants';
 import './App.css';
 
 function App() {
-
-  const [data, setData] = useState([]);
 
   useEffect(() => {
     var ros = new ROSLIB.Ros();
@@ -26,7 +26,16 @@ function App() {
       messageType : 'pr_msgs/PRArrayH'
     });
 
-    position.subscribe(message => setData(message.data));
+    const lineGraph = Plotly.plot('chart', [{
+      y: [],
+      type:'line'
+    }]);
+
+    position.subscribe(throttle(message => {
+      // Update plotly graph here!
+      // Plotly.addTraces(lineGraph, {y: message.data });
+    }, 1000));
+
   }, []);
 
   return (
@@ -34,7 +43,7 @@ function App() {
       <main className="main">
         <h1>PR Web</h1>
         <button>Click me!</button>
-        {data.map((item, index) => <div key={index}>{item}</div>)}
+        <div id="chart" />
       </main>
     </>
   );
