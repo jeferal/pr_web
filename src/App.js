@@ -38,11 +38,15 @@ function App() {
 
   }, []);
 
+  const click = () => {
+    
+  }
+
   return (
     <>
       <main className="main">
         <h1>PR Web</h1>
-        <button>Click me!</button>
+        <button onClick={click}>Click me!</button>
         <div id="chart" />
       </main>
     </>
