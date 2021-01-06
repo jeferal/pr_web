@@ -27,15 +27,6 @@ function App() {
       messageType : 'pr_msgs/PRArrayH'
     });
 
-   /*
-    const lineGraph = Plotly.plot('chart', [{
-      y: [],
-      type:'line'
-    }]);
-
-    */
-    var cnt = 0;
-
     position.subscribe(throttle(message => {
 
       var time = new Date();
@@ -45,8 +36,8 @@ function App() {
         y: [[message.data[0]], [message.data[1]]]
       }
 
-      var olderTime = time.setSeconds(time.getSeconds() - 30);
-      var futureTime = time.setSeconds(time.getSeconds() + 30);
+      var olderTime = time.setSeconds(time.getSeconds() - 15);
+      var futureTime = time.setSeconds(time.getSeconds() + 15);
 
       var secondView = {
         xaxis: {
@@ -62,22 +53,14 @@ function App() {
       Plotly.relayout('q1_chart', secondView);
       Plotly.extendTraces('q1_chart', update, [0, 1])
 
-    }, 100));
+    }, 1000));
     
-    /*var data = [{
-      x: [], 
-      y: [],
-      mode: 'lines',
-      line: {color: '#80CAF6'}
-    }, {
-      y: [],
-      mode: 'lines',
-      line: {color: '#DF56F1'}
-    }]*/
 
     var trace1 = {
       x: [],
       y: [],
+      xaxis: 'x1',
+      yaxis: 'y1',
       mode: 'lines',
       line: {
         color: '#80CAF6',
@@ -122,8 +105,8 @@ function App() {
 
   }, []);
 
-  const click = () => {
-    
+  const click = (generate_ref_server) => {
+
   }
 
   return (
