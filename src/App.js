@@ -40,12 +40,25 @@ function App() {
 
       var time = new Date();
 
-      Plotly.extendTraces('q1_chart', {
+      var update = {
         x: [[time]],
         y: [[message.data[0]]]
-      })
-      //[0,1]
-      cnt++;
+      }
+
+      var olderTime = time.setSeconds(time.getSeconds() - 30);
+      var futureTime = time.setSeconds(time.getSeconds() + 30);
+
+      var secondView = {
+        xaxis: {
+          type: 'date',
+          range: [olderTime,futureTime]
+        }
+      };
+
+      Plotly.relayout('q1_chart', secondView);
+      Plotly.extendTraces('q1_chart', update, [0])
+
+      /*cnt++;
   
       if(cnt > 100) {
         Plotly.relayout('q1_chart', {
@@ -53,7 +66,7 @@ function App() {
             range: [cnt-100, cnt]
           }
         })
-      }
+      }*/
 
     }, 100));
     
