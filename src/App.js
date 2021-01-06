@@ -12,6 +12,7 @@ import './App.css';
 function App() {
 
   useEffect(() => {
+
     var ros = new ROSLIB.Ros();
 
     ros.on('error', () => console.log('Error! 💥'));
@@ -26,15 +27,60 @@ function App() {
       messageType : 'pr_msgs/PRArrayH'
     });
 
+   /*
     const lineGraph = Plotly.plot('chart', [{
       y: [],
       type:'line'
     }]);
 
+    */
+    var cnt = 0;
+
     position.subscribe(throttle(message => {
-      // Update plotly graph here!
-      // Plotly.addTraces(lineGraph, {y: message.data });
-    }, 1000));
+
+      var time = new Date();
+
+      Plotly.extendTraces('q1_chart', {
+        x: [[time]],
+        y: [[message.data[0]]]
+      })
+      //[0,1]
+      cnt++;
+  
+      if(cnt > 100) {
+        Plotly.relayout('q1_chart', {
+          xaxis: {
+            range: [cnt-100, cnt]
+          }
+        })
+      }
+
+    }, 100));
+    
+    var data = [{
+      x: [], 
+      y: [],
+      mode: 'lines',
+      line: {color: '#80CAF6'}
+    }, {
+      y: [],
+      mode: 'lines',
+      line: {color: '#DF56F1'}
+    }]
+
+    var layout = {
+      title: 'Articulación q1',
+      xaxis: {
+        title: 'Time (s)'
+      },
+      yaxis: {
+        title: 'Posicón (m)',
+        range: [0, 1200.0],
+        autorange: false
+      }
+    };
+
+    Plotly.newPlot('q1_chart', data, layout);
 
   }, []);
 
@@ -47,7 +93,7 @@ function App() {
       <main className="main">
         <h1>PR Web</h1>
         <button onClick={click}>Click me!</button>
-        <div id="chart" />
+        <div id="q1_chart" />
       </main>
     </>
   );
