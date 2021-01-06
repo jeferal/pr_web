@@ -41,8 +41,8 @@ function App() {
       var time = new Date();
 
       var update = {
-        x: [[time]],
-        y: [[message.data[0]]]
+        x: [[time], [time]],
+        y: [[message.data[0]], [message.data[1]]]
       }
 
       var olderTime = time.setSeconds(time.getSeconds() - 30);
@@ -52,25 +52,19 @@ function App() {
         xaxis: {
           type: 'date',
           range: [olderTime,futureTime]
+        },
+        xaxis2: {
+          type: 'date',
+          range: [olderTime,futureTime]
         }
       };
 
       Plotly.relayout('q1_chart', secondView);
-      Plotly.extendTraces('q1_chart', update, [0])
-
-      /*cnt++;
-  
-      if(cnt > 100) {
-        Plotly.relayout('q1_chart', {
-          xaxis: {
-            range: [cnt-100, cnt]
-          }
-        })
-      }*/
+      Plotly.extendTraces('q1_chart', update, [0, 1])
 
     }, 100));
     
-    var data = [{
+    /*var data = [{
       x: [], 
       y: [],
       mode: 'lines',
@@ -79,19 +73,50 @@ function App() {
       y: [],
       mode: 'lines',
       line: {color: '#DF56F1'}
-    }]
+    }]*/
+
+    var trace1 = {
+      x: [],
+      y: [],
+      mode: 'lines',
+      line: {
+        color: '#80CAF6',
+      }
+    }
+
+    var trace2 = {
+      x: [],
+      y: [],
+      xaxis: 'x2',
+      yaxis: 'y2',
+      mode: 'lines',
+      line: {color: '#DF56F1'}
+    };
 
     var layout = {
-      title: 'Articulación q1',
       xaxis: {
         title: 'Time (s)'
       },
       yaxis: {
         title: 'Posicón (m)',
         range: [0, 1200.0],
+        autorange: false,
+        domain: [0.6,1]
+      },
+      xaxis2: {
+        title: 'Time (s)',
+        anchor: 'y2'
+      },
+      yaxis2: {
+        title: 'Posicón (m)',
+        range: [0, 1200.0],
+        domain: [0, 0.4],
+        anchor: 'x2',
         autorange: false
       }
-    };
+    }
+
+    var data = [trace1, trace2]
 
     Plotly.newPlot('q1_chart', data, layout);
 
