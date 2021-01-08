@@ -1,1 +1,1 @@
-export const ROS_WEBBRIDGE_SERVER = 'ws://192.168.1.135:9090';
+export const ROS_WEBBRIDGE_SERVER = 'ws://localhost:9090';

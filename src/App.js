@@ -23,7 +23,7 @@ function App() {
 
     const position = new ROSLIB.Topic({
       ros : ros,
-      name : '/joint_position',
+      name : '/ref_pose',
       messageType : 'pr_msgs/PRArrayH'
     });
 
@@ -32,12 +32,12 @@ function App() {
       var time = new Date();
 
       var update = {
-        x: [[time], [time]],
-        y: [[message.data[0]], [message.data[1]]]
+        x: [[time], [time], [time], [time]],
+        y: [[message.data[0]], [message.data[1]], [message.data[2]], [message.data[3]]]
       }
 
-      var olderTime = time.setSeconds(time.getSeconds() - 15);
-      var futureTime = time.setSeconds(time.getSeconds() + 15);
+      var olderTime = time.setSeconds(time.getSeconds() - 7);
+      var futureTime = time.setSeconds(time.getSeconds() + 7);
 
       var secondView = {
         xaxis: {
@@ -51,7 +51,7 @@ function App() {
       };
 
       Plotly.relayout('q1_chart', secondView);
-      Plotly.extendTraces('q1_chart', update, [0, 1])
+      Plotly.extendTraces('q1_chart', update, [0, 1, 2, 3])
 
     }, 1000));
     
@@ -62,6 +62,7 @@ function App() {
       xaxis: 'x1',
       yaxis: 'y1',
       mode: 'lines',
+      name: 'ref q1',
       line: {
         color: '#80CAF6',
       }
@@ -70,9 +71,30 @@ function App() {
     var trace2 = {
       x: [],
       y: [],
+      xaxis: 'x1',
+      yaxis: 'y1',
+      mode: 'lines',
+      name: 'q1',
+      line: {color: '#DF56F1'}
+    };
+
+    var trace3 = {
+      x: [],
+      y: [],
       xaxis: 'x2',
       yaxis: 'y2',
       mode: 'lines',
+      name: 'ref q2',
+      line: {color: '#80CAF6'}
+    };
+
+    var trace4 = {
+      x: [],
+      y: [],
+      xaxis: 'x2',
+      yaxis: 'y2',
+      mode: 'lines',
+      name: 'q2',
       line: {color: '#DF56F1'}
     };
 
@@ -82,9 +104,8 @@ function App() {
       },
       yaxis: {
         title: 'Posicón (m)',
-        range: [0, 1200.0],
+        range: [-1, 1],
         autorange: false,
-        domain: [0.6,1]
       },
       xaxis2: {
         title: 'Time (s)',
@@ -92,14 +113,17 @@ function App() {
       },
       yaxis2: {
         title: 'Posicón (m)',
-        range: [0, 1200.0],
-        domain: [0, 0.4],
+        range: [-1, 1],
         anchor: 'x2',
         autorange: false
-      }
+      },
+      grid: {
+        rows: 2,
+         columns: 2, 
+         pattern: 'independent'},
     }
 
-    var data = [trace1, trace2]
+    var data = [trace1, trace2, trace3, trace4]
 
     Plotly.newPlot('q1_chart', data, layout);
 
