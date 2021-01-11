@@ -15,25 +15,42 @@ function App() {
 
     var ros = new ROSLIB.Ros();
 
-    ros.on('error', () => console.log('Error! 💥'));
-    ros.on('connection', () => console.log('Connected! ✅'));
-    ros.on('close', () => console.log('Connection closed! ❌'));
+    ros.on('error', () => console.log('Error! ?'));
+    ros.on('connection', () => console.log('Connected! ?'));
+    ros.on('close', () => console.log('Connection closed! ?'));
 
     ros.connect(ROS_WEBBRIDGE_SERVER);
 
-    const position = new ROSLIB.Topic({
+    const joint_position_sub = new ROSLIB.Topic({
+      ros : ros,
+      name : '/joint_position',
+      messageType : 'pr_msgs/PRArrayH'
+    });
+
+    const ref_pose_sub = new ROSLIB.Topic({
       ros : ros,
       name : '/ref_pose',
       messageType : 'pr_msgs/PRArrayH'
     });
 
-    position.subscribe(throttle(message => {
+    var joint_position = [];
+    var ref_pose = [];
 
+    joint_position_sub.subscribe(throttle(message => {
+      joint_position = message.data;
+    }, 100));
+
+    ref_pose_sub.subscribe(throttle(message => {
+      ref_pose = message.data;
+    }, 100));
+
+    var interval = setInterval(function() {
+      
       var time = new Date();
 
       var update = {
         x: [[time], [time], [time], [time]],
-        y: [[message.data[0]], [message.data[1]], [message.data[2]], [message.data[3]]]
+        y: [[ref_pose[0]], [joint_position[0]], [ref_pose[1]], [joint_position[0]]]
       }
 
       var olderTime = time.setSeconds(time.getSeconds() - 7);
@@ -51,9 +68,9 @@ function App() {
       };
 
       Plotly.relayout('q1_chart', secondView);
-      Plotly.extendTraces('q1_chart', update, [0, 1, 2, 3])
+      Plotly.extendTraces('q1_chart', update, [0, 1, 2, 3]);
 
-    }, 1000));
+    }, 1000);
     
 
     var trace1 = {
@@ -104,7 +121,7 @@ function App() {
       },
       yaxis: {
         title: 'Posicón (m)',
-        range: [-1, 1],
+        range: [-1, 5],
         autorange: false,
       },
       xaxis2: {
@@ -113,7 +130,7 @@ function App() {
       },
       yaxis2: {
         title: 'Posicón (m)',
-        range: [-1, 1],
+        range: [-1, 5],
         anchor: 'x2',
         autorange: false
       },
