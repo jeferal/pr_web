@@ -7,12 +7,16 @@ import throttle from 'lodash/throttle'
 import Plotly from 'plotly.js-dist'
 
 import { ROS_WEBBRIDGE_SERVER } from './constants';
+import { PR_DB_SERVER } from './constants';
+
 import './App.css';
+
 
 function App() {
 
   useEffect(() => {
 
+    //ROS Connection
     var ros = new ROSLIB.Ros();
 
     ros.on('error', () => console.log('Error! ?'));
@@ -148,6 +152,16 @@ function App() {
 
   const click = (generate_ref_server) => {
 
+    const request = new Request(PR_DB_SERVER);
+    const url = request.url;
+    const method = request.method;
+    const cred = request.cred;
+
+    fetch('127.0.0.1:8000')
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+    })
   }
 
   return (
