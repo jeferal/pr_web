@@ -3,16 +3,34 @@ import 'eventemitter2/lib/eventemitter2';
 import 'roslib/build/roslib';
 
 import { useEffect } from 'react';
+import { useState } from 'react';
+
 import throttle from 'lodash/throttle'
 import Plotly from 'plotly.js-dist'
 
 import { ROS_WEBBRIDGE_SERVER } from './constants';
 import { PR_DB_SERVER } from './constants';
 
+import Button from '@material-ui/core/Button';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+
 import './App.css';
 
 
 function App() {
+
+  //Variable de estado
+  const [references, setReferences] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
 
@@ -148,23 +166,38 @@ function App() {
 
     Plotly.newPlot('q1_chart', data, layout);
 
-  }, []);
-
-  const click = (generate_ref_server) => {
-
     fetch(PR_DB_SERVER, {method: "get"})
     .then(response => response.json())
     .then(data => {
       console.log(data)
+      setReferences(JSON.stringify(data));
     })
-  }
+
+  }, []);
 
   return (
     <>
       <main className="main">
         <h1>PR Web</h1>
-        <button onClick={click}>Click me!</button>
+        <div>
+        <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+          Open Menu
+        </Button>
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+        >
+          <MenuItem onClick={handleClose}>Profile</MenuItem>
+          <MenuItem onClick={handleClose}>My account</MenuItem>
+          <MenuItem onClick={handleClose}>Logout</MenuItem>
+        </Menu>
+        </div>
+
         <div id="q1_chart" />
+        <div id="references">{references}</div>
       </main>
     </>
   );
