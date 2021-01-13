@@ -152,15 +152,10 @@ function App() {
 
   const click = (generate_ref_server) => {
 
-    const request = new Request(PR_DB_SERVER);
-    const url = request.url;
-    const method = request.method;
-    const cred = request.cred;
-
-    fetch('127.0.0.1:8000')
+    fetch(PR_DB_SERVER, {method: "get"})
     .then(response => response.json())
     .then(data => {
-      console.log(data);
+      console.log(data)
     })
   }
 
