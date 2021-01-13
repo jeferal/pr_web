@@ -152,9 +152,7 @@ function App() {
 
   const click = (generate_ref_server) => {
 
-    const request = new Request('http://localhost:8000/hello');
-    //const request = new Request('https://api.exchangeratesapi.io/latest?base=USD');
-    fetch(request, {method: "get"})
+    fetch(PR_DB_SERVER, {method: "get"})
     .then(response => response.json())
     .then(data => {
       console.log(data)
