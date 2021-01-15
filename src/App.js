@@ -30,6 +30,12 @@ function App() {
 
   const handleClose = () => {
 
+    var PerformTrajectory = new ROSLIB.Service({
+      ros: ros,
+      name: '/perform_trajectory',
+      serviceType: 'pr_msgs/srv/Trajectory'
+    });
+
     var request = new ROSLIB.ServiceRequest({
       path_trajectory: "/home/paralelo4dofnew/ros2_eloquent_ws/parallel_robot/references/refecart_TRR8_identificar.txt",
       is_cart: false
@@ -182,12 +188,6 @@ function App() {
       console.log(data)
       setReferences(JSON.stringify(data));
     })
-
-    var PerformTrajectory = new ROSLIB.Service({
-      ros: ros,
-      name: '/perform_trajectory',
-      serviceType: 'pr_msgs/srv/Trajectory'
-    });
 
     
   }, []);
