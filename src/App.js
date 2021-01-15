@@ -1,4 +1,4 @@
-/* global ROSLIB */
+/* global ROSLIB, PerformTrajectory */
 import 'eventemitter2/lib/eventemitter2';
 import 'roslib/build/roslib';
 
@@ -29,6 +29,16 @@ function App() {
   };
 
   const handleClose = () => {
+
+    var request = new ROSLIB.ServiceRequest({
+      path_trajectory: "/home/paralelo4dofnew/ros2_eloquent_ws/parallel_robot/references/refecart_TRR8_identificar.txt",
+      is_cart: false
+    });
+
+    PerformTrajectory.callService(request, function(result) {
+      console.log(result.error_code);
+      console.log(result.n_ref_loaded);
+    });
     setAnchorEl(null);
   };
 
@@ -173,6 +183,13 @@ function App() {
       setReferences(JSON.stringify(data));
     })
 
+    var PerformTrajectory = new ROSLIB.Service({
+      ros: ros,
+      name: '/perform_trajectory',
+      serviceType: 'pr_msgs/srv/Trajectory'
+    });
+
+    
   }, []);
 
   return (
