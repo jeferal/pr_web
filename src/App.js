@@ -10,27 +10,17 @@ import Plotly from 'plotly.js-dist'
 
 import { ROS_WEBBRIDGE_SERVER } from './constants';
 import { PR_DB_SERVER } from './constants';
-
-import Button from '@material-ui/core/Button';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
+import { data, layout} from './data';
 
 import './App.css';
 
+let PerformTrajectory;
 
 function App() {
 
   //Variable de estado
-  const [references, setReferences] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const [references, setReferences] = useState([]);
+  const [currentReference, setCurrentReference] = useState(null);
 
   useEffect(() => {
 
@@ -44,15 +34,21 @@ function App() {
     ros.connect(ROS_WEBBRIDGE_SERVER);
 
     const joint_position_sub = new ROSLIB.Topic({
-      ros : ros,
-      name : '/joint_position',
-      messageType : 'pr_msgs/PRArrayH'
+      ros: ros,
+      name: '/joint_position',
+      messageType: 'pr_msgs/PRArrayH'
     });
 
     const ref_pose_sub = new ROSLIB.Topic({
-      ros : ros,
-      name : '/ref_pose',
-      messageType : 'pr_msgs/PRArrayH'
+      ros: ros,
+      name: '/ref_pose',
+      messageType: 'pr_msgs/PRArrayH'
+    });
+
+    PerformTrajectory = new ROSLIB.Service({
+      ros: ros,
+      name: '/perform_trajectory',
+      serviceType: 'pr_msgs/srv/Trajectory'
     });
 
     var joint_position = [];
@@ -66,8 +62,8 @@ function App() {
       ref_pose = message.data;
     }, 100));
 
-    var interval = setInterval(function() {
-      
+    setInterval(function () {
+
       var time = new Date();
 
       var update = {
@@ -81,11 +77,11 @@ function App() {
       var secondView = {
         xaxis: {
           type: 'date',
-          range: [olderTime,futureTime]
+          range: [olderTime, futureTime]
         },
         xaxis2: {
           type: 'date',
-          range: [olderTime,futureTime]
+          range: [olderTime, futureTime]
         }
       };
 
@@ -93,113 +89,53 @@ function App() {
       Plotly.extendTraces('q1_chart', update, [0, 1, 2, 3]);
 
     }, 1000);
-    
-
-    var trace1 = {
-      x: [],
-      y: [],
-      xaxis: 'x1',
-      yaxis: 'y1',
-      mode: 'lines',
-      name: 'ref q1',
-      line: {
-        color: '#80CAF6',
-      }
-    }
-
-    var trace2 = {
-      x: [],
-      y: [],
-      xaxis: 'x1',
-      yaxis: 'y1',
-      mode: 'lines',
-      name: 'q1',
-      line: {color: '#DF56F1'}
-    };
-
-    var trace3 = {
-      x: [],
-      y: [],
-      xaxis: 'x2',
-      yaxis: 'y2',
-      mode: 'lines',
-      name: 'ref q2',
-      line: {color: '#80CAF6'}
-    };
-
-    var trace4 = {
-      x: [],
-      y: [],
-      xaxis: 'x2',
-      yaxis: 'y2',
-      mode: 'lines',
-      name: 'q2',
-      line: {color: '#DF56F1'}
-    };
-
-    var layout = {
-      xaxis: {
-        title: 'Time (s)'
-      },
-      yaxis: {
-        title: 'Posicón (m)',
-        range: [-1, 5],
-        autorange: false,
-      },
-      xaxis2: {
-        title: 'Time (s)',
-        anchor: 'y2'
-      },
-      yaxis2: {
-        title: 'Posicón (m)',
-        range: [-1, 5],
-        anchor: 'x2',
-        autorange: false
-      },
-      grid: {
-        rows: 2,
-         columns: 2, 
-         pattern: 'independent'},
-    }
-
-    var data = [trace1, trace2, trace3, trace4]
 
     Plotly.newPlot('q1_chart', data, layout);
 
-    fetch(PR_DB_SERVER, {method: "get"})
-    .then(response => response.json())
-    .then(data => {
-      console.log(data)
-      setReferences(JSON.stringify(data));
-    })
+    fetch(PR_DB_SERVER)
+      .then(response => response.json())
+      .then(data => {
+        setReferences(data);
+      })
 
   }, []);
 
-  return (
-    <>
-      <main className="main">
-        <h1>PR Web</h1>
-        <div>
-        <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
-          Open Menu
-        </Button>
-        <Menu
-          id="simple-menu"
-          anchorEl={anchorEl}
-          keepMounted
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-        >
-          <MenuItem onClick={handleClose}>Profile</MenuItem>
-          <MenuItem onClick={handleClose}>My account</MenuItem>
-          <MenuItem onClick={handleClose}>Logout</MenuItem>
-        </Menu>
-        </div>
+  useEffect(() => {
+    if (!references.length) {
+      return;
+    }
 
-        <div id="q1_chart" />
-        <div id="references">{references}</div>
-      </main>
-    </>
+    setCurrentReference(references[0].file_name);
+  }, [references])
+
+  const updateReference = (event) => {
+    setCurrentReference(event.target.value);
+  };
+
+  const start = () => {
+    const request = new ROSLIB.ServiceRequest({
+      path_trajectory: `/home/paralelo4dofnew/ros2_eloquent_ws/parallel_robot/references/${currentReference}.txt`,
+      is_cart: false
+    });
+
+    PerformTrajectory.callService(request, function(result) {
+      console.log(result.error_code);
+      console.log(result.n_ref_loaded);
+    });
+  }
+
+  return (
+    <main className="main">
+      <h1>PR Web</h1>
+      <div id="q1_chart" />
+      {references.length === 0 && <div>Loading references ...</div>} 
+      <select onChange={updateReference}>
+        {references.length > 0 && references.map(({ file_name }) => (
+          <option value={file_name}>{file_name}</option>
+        ))}
+      </select>
+      <button onClick={start}>Start</button>
+    </main>
   );
 }
 
