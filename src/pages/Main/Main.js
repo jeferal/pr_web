@@ -9,26 +9,24 @@ import Plotly from 'plotly.js-dist'
 
 import { Chart } from '../../components/Chart';
 import { PR_DB_SERVER, ROS_WEBBRIDGE_SERVER } from '../../constants';
-import { data, layout} from '../../data';
+import { data, layout} from '../../components/Chart/data';
 
 let PerformTrajectory;
 
 const Main = () => {
-
-  //Variable de estado
-  const [references, setReferences] = useState([]);
-  const [currentReference, setCurrentReference] = useState(null);
+  
+  const [trajectories, setTrajectories] = useState([]);
+  const [currentTrajectory, setCurrentTrajectory] = useState(null);
   const [refPosition, setRefPosition] = useState([]);
   const [position, setPosition] = useState([]);
 
   useEffect(() => {
-
     //ROS Connection
-    var ros = new ROSLIB.Ros();
+    const ros = new ROSLIB.Ros();
 
-    ros.on('error', () => console.log('Error! ?'));
-    ros.on('connection', () => console.log('Connected! ?'));
-    ros.on('close', () => console.log('Connection closed! ?'));
+    ros.on('error', () => console.log('Error!'));
+    ros.on('connection', () => console.log('Connected!'));
+    ros.on('close', () => console.log('Connection closed!'));
 
     ros.connect(ROS_WEBBRIDGE_SERVER);
 
@@ -52,10 +50,11 @@ const Main = () => {
 
     joint_position_sub.subscribe(throttle(message => {
       setPosition(message.data);
+      console.log(message.data);
     }, 100));
 
     ref_pose_sub.subscribe(throttle(message => {
-        setRefPosition(message.data);
+      setRefPosition(message.data);
     }, 100));
 
     Plotly.newPlot('q1_chart', data, layout);
@@ -63,26 +62,27 @@ const Main = () => {
     fetch(PR_DB_SERVER)
       .then(response => response.json())
       .then(data => {
-        setReferences(data);
+        setTrajectories(data);
       })
 
   }, []);
 
   useEffect(() => {
-    if (!references.length) {
+    if (!trajectories.length) {
       return;
     }
 
-    setCurrentReference(references[0].file_name);
-  }, [references])
+    setCurrentTrajectory(trajectories[0].file_name);
+  }, [trajectories])
 
   const updateReference = (event) => {
-    setCurrentReference(event.target.value);
+    setCurrentTrajectory(event.target.value);
   };
 
   const start = () => {
+    console.log(currentTrajectory);
     const request = new ROSLIB.ServiceRequest({
-      path_trajectory: `/home/paralelo4dofnew/ros2_eloquent_ws/parallel_robot/references/${currentReference}.txt`,
+      path_trajectory: `/home/paralelo4dofnew/ros2_eloquent_ws/parallel_robot/references/${currentTrajectory}.txt`,
       is_cart: false
     });
 
@@ -95,14 +95,15 @@ const Main = () => {
   return (
     <main className="main">
       <h1>PR Web</h1>
-      <Chart refPosition={refPosition} position={position} />
-      {references.length === 0 && <div>Loading references ...</div>} 
+      <Chart refPosition={refPosition} position={position}/>
+      {trajectories.length === 0 && <div>Loading references ...</div>} 
       <select onChange={updateReference}>
-        {references.length > 0 && references.map(({ file_name }, index) => (
+        {trajectories.length > 0 && trajectories.map(({ file_name }, index) => (
           <option key={index} value={file_name}>{file_name}</option>
         ))}
       </select>
       <button onClick={start}>Start</button>
+      <p>{currentTrajectory}</p>
     </main>
   );
 }
