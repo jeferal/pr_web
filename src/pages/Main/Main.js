@@ -5,11 +5,11 @@ import 'roslib/build/roslib';
 import { useEffect, useState } from 'react';
 
 import throttle from 'lodash/throttle'
-import Plotly from 'plotly.js-dist'
+//import Plotly from 'plotly.js-dist'
 
 import { Chart } from '../../components/Chart';
 import { PR_DB_SERVER, ROS_WEBBRIDGE_SERVER } from '../../constants';
-import { data, layout} from '../../components/Chart/data';
+//import { data, layout} from '../../components/Chart/data';
 
 let PerformTrajectory;
 
@@ -48,16 +48,25 @@ const Main = () => {
       serviceType: 'pr_msgs/srv/Trajectory'
     });
 
+    /*
     joint_position_sub.subscribe(throttle(message => {
       setPosition(message.data);
       console.log(message.data);
     }, 100));
+    */
+   setInterval(() => {
+      const msg_pose = [1,2,3,4];
+      setPosition(msg_pose);
+      console.log(msg_pose)
+   }, 1000);
 
+   /*
     ref_pose_sub.subscribe(throttle(message => {
       setRefPosition(message.data);
     }, 100));
+    */
 
-    Plotly.newPlot('q1_chart', data, layout);
+    //Plotly.newPlot('q1_chart', data, layout);
 
     fetch(PR_DB_SERVER)
       .then(response => response.json())
@@ -75,15 +84,19 @@ const Main = () => {
     setCurrentTrajectory(trajectories[0].file_name);
   }, [trajectories])
 
-  const updateReference = (event) => {
-    setCurrentTrajectory(event.target.value);
+  const updateTrajectory = (event) => {
+    setCurrentTrajectory(+event.target.value);
   };
 
   const start = () => {
-    console.log(currentTrajectory);
+    
+    const {file_name, is_cart} = trajectories.find(t => t.id === currentTrajectory);
+
+    console.log(is_cart);
+
     const request = new ROSLIB.ServiceRequest({
-      path_trajectory: `/home/paralelo4dofnew/ros2_eloquent_ws/parallel_robot/references/${currentTrajectory}.txt`,
-      is_cart: false
+      path_trajectory: `/home/paralelo4dofnew/ros2_eloquent_ws/parallel_robot/references/${file_name}.txt`,
+      is_cart
     });
 
     PerformTrajectory.callService(request, function(result) {
@@ -97,9 +110,9 @@ const Main = () => {
       <h1>PR Web</h1>
       <Chart refPosition={refPosition} position={position}/>
       {trajectories.length === 0 && <div>Loading references ...</div>} 
-      <select onChange={updateReference}>
-        {trajectories.length > 0 && trajectories.map(({ file_name }, index) => (
-          <option key={index} value={file_name}>{file_name}</option>
+      <select onChange={updateTrajectory}>
+        {trajectories.length > 0 && trajectories.map(({ file_name, id }, index) => (
+          <option key={index} value={id}>{file_name}</option>
         ))}
       </select>
       <button onClick={start}>Start</button>
