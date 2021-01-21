@@ -46,7 +46,7 @@ const trace1 = {
     },
     yaxis: {
       title: 'Posicón (m)',
-      range: [-1, 5],
+      range: [0, 1],
       autorange: false,
     },
     xaxis2: {
@@ -55,7 +55,7 @@ const trace1 = {
     },
     yaxis2: {
       title: 'Posicón (m)',
-      range: [-1, 5],
+      range: [0, 1],
       anchor: 'x2',
       autorange: false
     },
