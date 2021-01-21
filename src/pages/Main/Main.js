@@ -10,6 +10,7 @@ import Plotly from 'plotly.js-dist'
 import { Chart } from '../../components/Chart';
 import { PR_DB_SERVER, ROS_WEBBRIDGE_SERVER } from '../../constants';
 import { data, layout} from '../../data';
+import { differenceBy } from 'lodash';
 
 let PerformTrajectory;
 
@@ -78,9 +79,11 @@ const Main = () => {
 
   const updateReference = (event) => {
     setCurrentReference(event.target.value);
+    console.log(event.target.value)
   };
 
   const start = () => {
+    console.log(currentReference);
     const request = new ROSLIB.ServiceRequest({
       path_trajectory: `/home/paralelo4dofnew/ros2_eloquent_ws/parallel_robot/references/${currentReference}.txt`,
       is_cart: false
@@ -98,11 +101,12 @@ const Main = () => {
       <Chart refPosition={refPosition} position={position} />
       {references.length === 0 && <div>Loading references ...</div>} 
       <select onChange={updateReference}>
-        {references.length > 0 && references.map(({ file_name }, index) => (
+      {references.length > 0 && references.map(({ file_name }, index) => (
           <option key={index} value={file_name}>{file_name}</option>
         ))}
       </select>
       <button onClick={start}>Start</button>
+      <div>{currentReference}</div>
     </main>
   );
 }
