@@ -21,12 +21,12 @@ useEffect(() => {
 useEffect(() => {
 
   const update = {
-    x: [[time.date], [time.date], [time.date], [time.date]],
-    y: [[refPosition[0]], [position[0]], [refPosition[1]], [position[1]]]
+    x: [[time.date], [time.date], [time.date], [time.date], [time.date], [time.date], [time.date], [time.date]],
+    y: [[refPosition[0]], [position[0]], [refPosition[1]], [position[1]], [refPosition[2]], [position[2]], [refPosition[3]], [position[3]]]
   }
 
-  const olderTime = time.date.setSeconds(time.date.getSeconds() - 7);
-  const futureTime = time.date.setSeconds(time.date.getSeconds() + 7);
+  const olderTime = time.date.setSeconds(time.date.getSeconds() - 15);
+  const futureTime = time.date.setSeconds(time.date.getSeconds() + 15);
 
   const secondView = {
     xaxis: {
@@ -36,11 +36,19 @@ useEffect(() => {
     xaxis2: {
       type: 'date',
       range: [olderTime, futureTime]
+    },
+    xaxis3: {
+      type: 'date',
+      range: [olderTime, futureTime]
+    },
+    xaxis4: {
+      type: 'date',
+      range: [olderTime, futureTime]
     }
   };
 
   Plotly.relayout('q1_chart', secondView);
-  Plotly.extendTraces('q1_chart', update, [0, 1, 2, 3]);
+  Plotly.extendTraces('q1_chart', update, [0, 1, 2, 3, 4, 5, 6, 7]);
 
 }, [time])
 
