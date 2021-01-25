@@ -17,7 +17,6 @@ const Main = () => {
   const [currentTrajectory, setCurrentTrajectory] = useState(null);
   const [refPosition, setRefPosition] = useState([]);
   const [position, setPosition] = useState([]);
-  const [time, setTime] = useState([]);
 
   useEffect(() => {
     //ROS Connection
@@ -47,7 +46,6 @@ const Main = () => {
       serviceType: 'pr_msgs/srv/Trajectory'
     });
 
-    
     joint_position_sub.subscribe(throttle(message => {
       setPosition(message.data);
     }, 1000));
